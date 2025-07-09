@@ -41,17 +41,17 @@ It provides distinct interfaces for Users and Admins, secure authentication, and
 ## How to test the App
 You can explore different features of the section under various sections-
 
-- # Doctor Appointment
+- ### Doctor Appointment
   - Go to the cholestrol section under the Doctor Consultation.
   - Book an appointment by selecting date and time.
   - The appointment request will be added for admin approval.
  
-- # Lab Test Booking
+- ### Lab Test Booking
   - Go to the Vitamin D Test under Lab Tests.
   - Select the desired time slot and book the test.
   - The booking will appear as a pending lab test in your dashboard.
  
-- # Medicine Orders
+- ### Medicine Orders
   - Go to the Diabetes section under Medicines.
   - Place an order for medicines.
   - The order will be pending approval from the admin.
