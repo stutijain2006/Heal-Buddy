@@ -4,6 +4,7 @@ import axios from "axios";
 
 const Cardiology = () => {
     const navigate = useNavigate();
+    const [selectedLocation, setSelectedLocation] = useState("All");
     const [form, setForm] = useState({
         doctorName: "",
         appointmentDate: "",
@@ -12,6 +13,10 @@ const Cardiology = () => {
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleLocationChange = (e) => {
+        setSelectedLocation(e.target.value);
     };
 
     const handleBook = async (doctorName) => {
@@ -39,7 +44,8 @@ const Cardiology = () => {
             specialization: "Cardiac Sciences | Electrophysiology",
             experience: "35 Years",
             fee: "₹2000",
-            image: "/assets/doc1.png"
+            image: "/assets/doc1.png",
+            location: "Delhi"
         },
         {
             name: "Dr. Balbir Singh",
@@ -47,7 +53,8 @@ const Cardiology = () => {
             specialization: "Cardiac Sciences | Interventional Cardiology",
             experience: "33 Years",
             fee: "₹2500",
-            image: "/assets/doc2.png"
+            image: "/assets/doc2.png",
+            location: "Delhi"
         },
         {
             name: "Dr. Ashok Seth",
@@ -55,7 +62,8 @@ const Cardiology = () => {
             specialization: "Cardiac Sciences | Interventional Cardiology",
             experience: "40 Years",
             fee: "₹5000",
-            image: "/assets/doc3.png"
+            image: "/assets/doc3.png",
+            location: "Delhi"
         },
         {
             name: "Dr. T.S. Kler",
@@ -63,7 +71,8 @@ const Cardiology = () => {
             specialization: "Cardiac Sciences | Electrophysiology",
             experience: "37 Years",
             fee: "₹2500",
-            image: "/assets/doc4.png"
+            image: "/assets/doc4.png",
+            location: "Delhi"
         },
         {
             name: "Dr. Tripti Deb",
@@ -71,9 +80,68 @@ const Cardiology = () => {
             specialization: "Cardiac Sciences | Electrophysiology",
             experience: "40 Years",
             fee: "₹550",
-            image: "/assets/doc5.png"
+            image: "/assets/doc5.png",
+            location: "Delhi"
+        },
+        {
+            name: "Dr. Rajesh Sharma",
+            hospital: "SENIOR CONSULTANT |Kokilaben Hospital, Mumbai",
+            specialization: "Cardiac Sciences | Interventional Cardiology",
+            experience: "28 Years",
+            fee: "₹1800",
+            image: "/assets/doc1.png",
+            location: "Mumbai"
+        },
+        {
+            name: "Dr. Priya Mehta",
+            hospital: "DIRECTOR CARDIOLOGY |Lilavati Hospital, Mumbai",
+            specialization: "Cardiac Sciences | Electrophysiology",
+            experience: "32 Years",
+            fee: "₹2200",
+            image: "/assets/doc2.png",
+            location: "Mumbai"
+        },
+        {
+            name: "Dr. Sanjay Kumar",
+            hospital: "HEAD CARDIOLOGY |Fortis Hospital, Mumbai",
+            specialization: "Cardiac Sciences | Interventional Cardiology",
+            experience: "30 Years",
+            fee: "₹2000",
+            image: "/assets/doc3.png",
+            location: "Mumbai"
+        },
+        {
+            name: "Dr. Vikram Reddy",
+            hospital: "SENIOR CARDIOLOGIST |Apollo Hospitals, Bangalore",
+            specialization: "Cardiac Sciences | Electrophysiology",
+            experience: "25 Years",
+            fee: "₹1500",
+            image: "/assets/doc4.png",
+            location: "Bangalore"
+        },
+        {
+            name: "Dr. Ananya Rao",
+            hospital: "CONSULTANT CARDIOLOGY |Manipal Hospital, Bangalore",
+            specialization: "Cardiac Sciences | Interventional Cardiology",
+            experience: "22 Years",
+            fee: "₹1600",
+            image: "/assets/doc5.png",
+            location: "Bangalore"
+        },
+        {
+            name: "Dr. Arjun Nair",
+            hospital: "DIRECTOR CARDIAC |Narayana Health, Bangalore",
+            specialization: "Cardiac Sciences | Electrophysiology",
+            experience: "29 Years",
+            fee: "₹1700",
+            image: "/assets/doc1.png",
+            location: "Bangalore"
         }
     ];
+
+    const filteredDoctors = selectedLocation === "All" 
+        ? doctors 
+        : doctors.filter(doc => doc.location === selectedLocation);
 
     return (
         <div style={{ backgroundColor: "#E8FBFB", minHeight: "100vh", padding: "1rem" }}>
@@ -84,10 +152,11 @@ const Cardiology = () => {
             </div>
 
             <div style={styles.filtersRow}>
-                <select style={styles.select}>
-                    <option>Delhi</option>
-                    <option>Mumbai</option>
-                    <option>Bangalore</option>
+                <select style={styles.select} value={selectedLocation} onChange={handleLocationChange}>
+                    <option value="All">All Locations</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Bangalore">Bangalore</option>
                 </select>
                 <select style={styles.select}>
                     <option>Digital Consult</option>
@@ -109,9 +178,16 @@ const Cardiology = () => {
                 </select>
             </div>
 
-            <div style={styles.head2}>Best Cardiologists in Delhi →</div>
+            <div style={styles.head2}>
+                {selectedLocation === "All" 
+                    ? `Best Cardiologists in All Locations →` 
+                    : `Best Cardiologists in ${selectedLocation} →`}
+            </div>
             <div>
-                {doctors.map((doc, idx) => (
+                {filteredDoctors.length === 0 ? (
+                    <div style={styles.noResults}>No doctors found in {selectedLocation}</div>
+                ) : (
+                    filteredDoctors.map((doc, idx) => (
                     <div key={idx} style={styles.doctorCard}>
                         <img src={doc.image} alt={doc.name} style={styles.image} />
                         <div>
@@ -135,18 +211,14 @@ const Cardiology = () => {
                             <button onClick={() => handleBook(doc.name)} style={styles.bookBtn}>Book Appointment</button>
                         </div>
                     </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
 };
 
 const styles = {
-    filtersRow: {
-        display: "flex",
-        gap: "1rem",
-        marginTop: "0.5rem"
-    },
     Heading: {
         display: "flex",
         alignItems: "center",
@@ -256,6 +328,14 @@ const styles = {
         borderRadius: "8px",
         cursor: "pointer",
         fontSize: "1rem",
+        fontFamily: 'inter bold 500',
+        fontWeight: 'bold'
+    },
+    noResults: {
+        textAlign: "center",
+        padding: "2rem",
+        fontSize: "1.2rem",
+        color: "#808080",
         fontFamily: 'inter bold 500',
         fontWeight: 'bold'
     }
