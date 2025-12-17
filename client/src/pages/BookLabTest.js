@@ -11,6 +11,12 @@ const BookLabTest = () => {
         navigate(path);
     };
 
+    const handleTestClick = (testName) => {
+        // Convert test name to URL-friendly format
+        const testSlug = testName.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-');
+        navigate(`/book-lab/${testSlug}`);
+    };
+
     const filterItems = (items) => {
         if (!searchQuery) return items;
         return items.filter(item => 
@@ -136,7 +142,7 @@ const BookLabTest = () => {
                             <div
                                 key={item.name}
                                 style={styles.card}
-                                onClick={() => item.name === "Vitamin D" && handleNavigate("/book-lab/vitamin-d")}
+                                onClick={() => handleTestClick(item.name)}
                             >
                                 <img src={item.icon} alt={item.name} style={styles.icon} />
                                 <div>{item.name}</div>

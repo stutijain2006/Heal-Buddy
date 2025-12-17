@@ -15,6 +15,9 @@ import VitaminDTest from './pages/VitaminDTest';
 import ProtectedRoute from './pages/ProtectedRoute';
 import Profile from './pages/Profile';
 import DiabetesCare from './pages/DiabetesCare';
+import DoctorSpecialty from './pages/DoctorSpecialty';
+import LabTestPage from './pages/LabTestPage';
+import MedicineCategory from './pages/MedicineCategory';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAppointments from './pages/AdminAppointments';
 import AdminLabTests from './pages/AdminLabPanel';
@@ -33,13 +36,21 @@ function App() {
           <Route path="/my-labs" element={<ProtectedRoute><MyLabTests /></ProtectedRoute>} />
           <Route path="/order-medicine" element={<ProtectedRoute><MedicineOrder /></ProtectedRoute>} />
           <Route path="/my-medicines" element={<ProtectedRoute><MyMedicineOrders /></ProtectedRoute>} />
+          {/* Legacy routes for backward compatibility */}
+          <Route path="/doctors/cardiology" element={<ProtectedRoute><DoctorSpecialty /></ProtectedRoute>} />
           <Route path="/doctors/Cardiology" element={<ProtectedRoute><Cardiology /></ProtectedRoute>} />
+          <Route path="/book-lab/vitamin-d" element={<ProtectedRoute><VitaminDTest /></ProtectedRoute>} />
+          <Route path="/order-medicine/diabetes-care" element={<ProtectedRoute><DiabetesCare /></ProtectedRoute>} />
+          
+          {/* Dynamic routes for all specialties, tests, and categories */}
+          <Route path="/doctors/:specialty" element={<ProtectedRoute><DoctorSpecialty /></ProtectedRoute>} />
+          <Route path="/book-lab/:testName" element={<ProtectedRoute><LabTestPage /></ProtectedRoute>} />
+          <Route path="/order-medicine/:category" element={<ProtectedRoute><MedicineCategory /></ProtectedRoute>} />
+          
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>} >
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Home />} />  
           </Route>
-          <Route path="/book-lab/vitamin-d" element={<ProtectedRoute><VitaminDTest /></ProtectedRoute>} />
-          <Route path= "/order-medicine/diabetes-care" element={<ProtectedRoute><DiabetesCare /></ProtectedRoute>} />
           <Route path= "/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path= "/admin/appointments" element={<AdminRoute><AdminAppointments /></AdminRoute>} />
           <Route path= "/admin/lab-tests" element={<AdminRoute><AdminLabTests /></AdminRoute>} />

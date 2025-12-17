@@ -120,14 +120,15 @@ const MedicineOrder = () => {
                 <div style={styles.categorySection1}>
                     <h3 style={styles.sectionHeading}>Browse by Health Conditions</h3>
                     <div style={styles.categoryList}>
-                        {filterItems(healthConditions).map((cond) => (
-                            <div
-                                key={cond.name}
-                                style={styles.categoryItem}
-                                onClick={() => {
-                                    if (cond.name === "Diabetes Care") navigate("/order-medicine/diabetes-care");
-                                }}
-                            >
+                    {filterItems(healthConditions).map((cond) => (
+                        <div
+                            key={cond.name}
+                            style={styles.categoryItem}
+                            onClick={() => {
+                                const categorySlug = cond.name.toLowerCase().replace(/\s+/g, '-');
+                                navigate(`/order-medicine/${categorySlug}`);
+                            }}
+                        >
                                 <img
                                     src={cond.img}
                                     alt={cond.name}

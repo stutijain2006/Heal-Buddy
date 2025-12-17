@@ -5,8 +5,10 @@ const BookAppointment = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
 
-    const handleCardiologyClick = () => {
-        navigate("/doctors/cardiology");
+    const handleSpecialtyClick = (specialtyName) => {
+        // Convert specialty name to URL-friendly format
+        const specialtySlug = specialtyName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and').replace(/\.\.\./g, '');
+        navigate(`/doctors/${specialtySlug}`);
     };
 
     const handleSearchChange = (e) => {
@@ -62,7 +64,7 @@ const BookAppointment = () => {
                             <div
                                 key={item.name}
                                 style={styles.card}
-                                onClick={() => item.name === "Cardiology" && handleCardiologyClick()}
+                                onClick={() => handleSpecialtyClick(item.name)}
                             >
                                 <img src={item.icon} alt={item.name} style={styles.icon} />
                                 <div>{item.name}</div>
