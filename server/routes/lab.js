@@ -6,18 +6,32 @@ const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 router.post('/book', verifyToken, async (req, res) => {
     try {
         const { testName, testDate, timeSlot, mode } = req.body;
+        
+        // Validate and parse the date
+        let parsedDate;
+        if (testDate) {
+            parsedDate = new Date(testDate);
+            if (isNaN(parsedDate.getTime())) {
+                return res.status(400).json({ message: 'Invalid date format' });
+            }
+        } else {
+            // Default to tomorrow if no date provided
+            parsedDate = new Date();
+            parsedDate.setDate(parsedDate.getDate() + 1);
+        }
+        
         const test = await LabTest.create({
             testName,
             mode,
-            testDate,
+            testDate: parsedDate,
             timeSlot,
             status: 'pending',
             userId: req.user.id
         });
         res.status(201).json(test);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error booking lab test' , error : error.message});
+        console.error('Error booking lab test:', error);
+        res.status(500).json({ message: 'Error booking lab test', error: error.message });
     }
 });
 

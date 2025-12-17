@@ -9,18 +9,25 @@ const VitaminDTest = () => {
     const navigate = useNavigate();
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + 1);
+    // Format for display (DD/MM/YYYY)
     const formattedDate = nextDate.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
     });
+    // Format for API (ISO string)
+    const apiDate = nextDate.toISOString();
 
     const handleBooking = async () => {
         const token = localStorage.getItem("token");
+        if (!selectedSlot) {
+            setBookingStatus("Please select a time slot");
+            return;
+        }
         try {
             const response = await axios.post("http://localhost:5000/api/lab-tests/book", {
                 testName: "Vitamin D Test",
-                testDate: formattedDate,
+                testDate: apiDate,
                 timeSlot: selectedSlot,
                 mode: "lab"
             }, {
@@ -28,7 +35,7 @@ const VitaminDTest = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setBookingStatus("Test added successfully, Awaiting admin approval")
+            setBookingStatus("Test added successfully, Awaiting admin approval");
         } catch (error) {
             console.error("Error booking test:", error);
             setBookingStatus("Error booking test. Please try again later.");
