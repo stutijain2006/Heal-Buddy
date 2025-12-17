@@ -154,7 +154,10 @@ const DiabetesCare = () => {
 
             <div style={styles.medicineList}>
                 {medicines
-                    .filter(med => med.name.toLowerCase().includes(search.toLowerCase()))
+                    .filter(med => 
+                        med.name.toLowerCase().includes(search.toLowerCase()) ||
+                        med.description.toLowerCase().includes(search.toLowerCase())
+                    )
                     .map(med => (
                         <div key={med.id} style={styles.medicineCard}>
                             <img src={med.image} alt={med.name} style={styles.medicineImage} />
@@ -166,11 +169,19 @@ const DiabetesCare = () => {
                                     type="file"
                                     accept=".jpg, .jpeg, .png, .pdf"
                                     onChange={(e) => handleFileChange(med.id, e.target.files[0])}
-                                    style={{ marginBottom: '0.5rem', padding: '0.5rem', fontSize: '0.8rem' }} />
+                                    style={{ marginBottom: '0.5rem', padding: '0.5rem', fontSize: '0.8rem', position: 'absolute', bottom: '10%', left: '10%', width: '80%' }} />
                                 <button onClick={() => handleBuy(med)} style={styles.buyButton}>Buy Now</button>
                             </div>
                         </div>
                     ))}
+                {medicines.filter(med => 
+                    med.name.toLowerCase().includes(search.toLowerCase()) ||
+                    med.description.toLowerCase().includes(search.toLowerCase())
+                ).length === 0 && search && (
+                    <div style={styles.noResults}>
+                        No medicines found for "{search}"
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -246,6 +257,7 @@ const styles = {
         display: "flex",
         flexWrap: "wrap",
         gap: "1.5rem",
+        alignItems: 'flex-start',
         justifyContent: "center",
         margin: '2rem 1rem'
     },
@@ -257,11 +269,24 @@ const styles = {
         padding: "1rem",
         borderRadius: "12px",
         border: "0.52px solid #808080",
-        textAlign: 'left'
+        textAlign: 'left',
+        position: 'relative'
+    },
+    medicineCard: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "15rem",
+        padding: "1rem",
+        borderRadius: "12px",
+        border: "0.52px solid #808080",
+        textAlign: 'left',
+        position: 'relative',
+        height: '70vh'
     },
     medicineImage: {
-        width: "100%",
-        height: "auto",
+        width: "15vw",
+        height: "30vh",
         objectFit: "cover",
         marginBottom: "1rem"
     },
@@ -293,6 +318,19 @@ const styles = {
         color: "#fff",
         cursor: "pointer",
         fontSize: "1rem",
+        position: 'absolute',
+        bottom: '3%', 
+        width: '80%',
+        left: '10%',
+    },
+    noResults: {
+        textAlign: "center",
+        padding: "3rem",
+        fontSize: "1.2rem",
+        color: "#808080",
+        fontFamily: 'inter bold 500',
+        fontWeight: 'bold',
+        width: "100%"
     }
 };
 

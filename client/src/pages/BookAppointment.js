@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const BookAppointment = () => {
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleCardiologyClick = () => {
         navigate("/doctors/cardiology");
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const filterItems = (items) => {
+        if (!searchQuery) return items;
+        return items.filter(item => 
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
     };
 
     return (
@@ -23,7 +35,12 @@ const BookAppointment = () => {
                     </div>
                 </div>
                 <div style={styles.heading}>Doctor Consultation</div>
-                <input placeholder=" 🔍︎ Search Doctors" style={styles.searchBar} />
+                <input 
+                    placeholder=" 🔍︎ Search Doctors, Specialties, Conditions" 
+                    style={styles.searchBar}
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                />
             </div>
 
             <div style={styles.consultType}>
@@ -37,39 +54,57 @@ const BookAppointment = () => {
                 </div>
             </div>
 
-            <h3 style={styles.sectionTitle}>Top Specialties →</h3>
-            <div style={styles.grid}>
-                {topSpecialties.map((item) => (
-                    <div
-                        key={item.name}
-                        style={styles.card}
-                        onClick={() => item.name === "Cardiology" && handleCardiologyClick()}
-                    >
-                        <img src={item.icon} alt={item.name} style={styles.icon} />
-                        <div>{item.name}</div>
+            {filterItems(topSpecialties).length > 0 && (
+                <>
+                    <h3 style={styles.sectionTitle}>Top Specialties →</h3>
+                    <div style={styles.grid}>
+                        {filterItems(topSpecialties).map((item) => (
+                            <div
+                                key={item.name}
+                                style={styles.card}
+                                onClick={() => item.name === "Cardiology" && handleCardiologyClick()}
+                            >
+                                <img src={item.icon} alt={item.name} style={styles.icon} />
+                                <div>{item.name}</div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
 
-            <h3 style={styles.sectionTitle}>Common Health Conditions →</h3>
-            <div style={styles.grid}>
-                {commonConditions.map((item) => (
-                    <div key={item.name} style={styles.card}>
-                        <img src={item.icon} alt={item.name} style={styles.icon} />
-                        <div>{item.name}</div>
+            {filterItems(commonConditions).length > 0 && (
+                <>
+                    <h3 style={styles.sectionTitle}>Common Health Conditions →</h3>
+                    <div style={styles.grid}>
+                        {filterItems(commonConditions).map((item) => (
+                            <div key={item.name} style={styles.card}>
+                                <img src={item.icon} alt={item.name} style={styles.icon} />
+                                <div>{item.name}</div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
 
-            <h3 style={styles.sectionTitle}>Explore Other Offerings →</h3>
-            <div style={styles.grid}>
-                {otherOfferings.map((item) => (
-                    <div key={item.name} style={styles.card}>
-                        <img src={item.icon} alt={item.name} style={styles.icon} />
-                        <div>{item.name}</div>
+            {filterItems(otherOfferings).length > 0 && (
+                <>
+                    <h3 style={styles.sectionTitle}>Explore Other Offerings →</h3>
+                    <div style={styles.grid}>
+                        {filterItems(otherOfferings).map((item) => (
+                            <div key={item.name} style={styles.card}>
+                                <img src={item.icon} alt={item.name} style={styles.icon} />
+                                <div>{item.name}</div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
+
+            {searchQuery && filterItems([...topSpecialties, ...commonConditions, ...otherOfferings]).length === 0 && (
+                <div style={styles.noResults}>
+                    No results found for "{searchQuery}"
+                </div>
+            )}
 
             <div style={styles.footerCTA}>
                 <div style={styles.footerText}>Under the weather?<br />Assess your symptoms, consult experts,<br />and get prescriptions you need—all in one place.</div>
@@ -264,6 +299,14 @@ const styles = {
         color: "#385B4A",
         fontFamily: "instrument sans bold 500",
         margin: '1rem 0 '
+    },
+    noResults: {
+        textAlign: "center",
+        padding: "3rem",
+        fontSize: "1.2rem",
+        color: "#808080",
+        fontFamily: 'inter bold 500',
+        fontWeight: 'bold'
     }
 };
 

@@ -11,6 +11,14 @@ const BookLabTest = () => {
         navigate(path);
     };
 
+    const filterItems = (items) => {
+        if (!searchQuery) return items;
+        return items.filter(item => 
+            (item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (item.label && item.label.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+    };
+
     const healthChecks = [
         { name: "Full Body Checkup", icon: "/assets/full-body-checkup.png" },
         { name: "Diabetes", icon: "/assets/diabetes.png" },
@@ -42,7 +50,12 @@ const BookLabTest = () => {
                     </select>
                 </div>
                 <h2 style={styles.heading}>Lab Testing</h2>
-                <input placeholder=" 🔍︎ Search for Lab Tests" style={styles.searchBar} />
+                <input 
+                    placeholder=" 🔍︎ Search for Lab Tests" 
+                    style={styles.searchBar}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
             </div>
 
             <div style={styles.quickActions}>
@@ -66,35 +79,48 @@ const BookLabTest = () => {
 
             <div style={styles.section}>
                 <h3 style={styles.heading}>Lab Tests & Packages →</h3>
-                <div style={styles.labCategories}>
-                    {[
-                        { label: "For Women", icon: "/assets/for-women.png" },
-                        { label: "For Men", icon: "/assets/for-men.png" },
-                        { label: "Lifestyle Checkups", icon: "/assets/lifestyle-checkup.png" },
-                        { label: "Special Tests", icon: "/assets/special-tests.png" },
-                    ].map((item, idx) => (
-                        <div key={idx} style={{...styles.categoryCard,
-                            borderBottom: item.label=== activeCategory? "4px solid black" : "none"
-                        }}
-                        onclick= {() => setActiveCategory(item.label)} >
-                            <img src={item.icon} alt={item.label} style={styles.categoryIcon} />
-                            <div style={styles.categoryText}>{item.label}</div>
-                        </div>
-                    ))}
-                </div>
+                {filterItems([
+                    { label: "For Women", icon: "/assets/for-women.png" },
+                    { label: "For Men", icon: "/assets/for-men.png" },
+                    { label: "Lifestyle Checkups", icon: "/assets/lifestyle-checkup.png" },
+                    { label: "Special Tests", icon: "/assets/special-tests.png" },
+                ]).length > 0 && (
+                    <div style={styles.labCategories}>
+                        {filterItems([
+                            { label: "For Women", icon: "/assets/for-women.png" },
+                            { label: "For Men", icon: "/assets/for-men.png" },
+                            { label: "Lifestyle Checkups", icon: "/assets/lifestyle-checkup.png" },
+                            { label: "Special Tests", icon: "/assets/special-tests.png" },
+                        ]).map((item, idx) => (
+                            <div key={idx} style={{...styles.categoryCard,
+                                borderBottom: item.label=== activeCategory? "4px solid black" : "none"
+                            }}
+                            onClick= {() => setActiveCategory(item.label)} >
+                                <img src={item.icon} alt={item.label} style={styles.categoryIcon} />
+                                <div style={styles.categoryText}>{item.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-                <div style={styles.womenCategories}>
-                    {[
-                        { label: "Adult women", icon: "/assets/adult-women.png" },
-                        { label: "Senior women", icon: "/assets/senior-women.png" },
-                        { label: "Fitness", icon: "/assets/fitness.png" },
-                    ].map((item, idx) => (
-                        <div key={idx} style={styles.categoryCard}>
-                            <img src={item.icon} alt={item.label} style={styles.categoryIcon} />
-                            <div style={styles.categoryText}>{item.label}</div>
-                        </div>
-                    ))}
-                </div>
+                {filterItems([
+                    { label: "Adult women", icon: "/assets/adult-women.png" },
+                    { label: "Senior women", icon: "/assets/senior-women.png" },
+                    { label: "Fitness", icon: "/assets/fitness.png" },
+                ]).length > 0 && (
+                    <div style={styles.womenCategories}>
+                        {filterItems([
+                            { label: "Adult women", icon: "/assets/adult-women.png" },
+                            { label: "Senior women", icon: "/assets/senior-women.png" },
+                            { label: "Fitness", icon: "/assets/fitness.png" },
+                        ]).map((item, idx) => (
+                            <div key={idx} style={styles.categoryCard}>
+                                <img src={item.icon} alt={item.label} style={styles.categoryIcon} />
+                                <div style={styles.categoryText}>{item.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <button style={styles.exploreBtn}>Explore Packages For Women</button>
             </div>
@@ -104,18 +130,26 @@ const BookLabTest = () => {
                     <h3 style={styles.sectionTitle}>Doctor Created Health Checks →</h3>
                     <div style={styles.seeAll}>See All</div>
                 </div>
-                <div style={styles.grid}>
-                    {healthChecks.map((item) => (
-                        <div
-                            key={item.name}
-                            style={styles.card}
-                            onClick={() => item.name === "Vitamin D" && handleNavigate("/book-lab/vitamin-d")}
-                        >
-                            <img src={item.icon} alt={item.name} style={styles.icon} />
-                            <div>{item.name}</div>
+                {filterItems(healthChecks).length > 0 ? (
+                    <div style={styles.grid}>
+                        {filterItems(healthChecks).map((item) => (
+                            <div
+                                key={item.name}
+                                style={styles.card}
+                                onClick={() => item.name === "Vitamin D" && handleNavigate("/book-lab/vitamin-d")}
+                            >
+                                <img src={item.icon} alt={item.name} style={styles.icon} />
+                                <div>{item.name}</div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    searchQuery && (
+                        <div style={styles.noResults}>
+                            No results found for "{searchQuery}"
                         </div>
-                    ))}
-                </div>
+                    )
+                )}
             </div>
 
             <div style={styles.offerBox}>
@@ -384,6 +418,14 @@ const styles = {
         width: '2.5vw',
         height: 'auto',
         marginRight: '1rem'
+    },
+    noResults: {
+        textAlign: "center",
+        padding: "3rem",
+        fontSize: "1.2rem",
+        color: "#808080",
+        fontFamily: 'inter bold 500',
+        fontWeight: 'bold'
     }
 };
 

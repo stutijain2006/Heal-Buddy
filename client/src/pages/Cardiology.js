@@ -5,6 +5,7 @@ import axios from "axios";
 const Cardiology = () => {
     const navigate = useNavigate();
     const [selectedLocation, setSelectedLocation] = useState("All");
+    const [searchQuery, setSearchQuery] = useState("");
     const [form, setForm] = useState({
         doctorName: "",
         appointmentDate: "",
@@ -17,6 +18,10 @@ const Cardiology = () => {
 
     const handleLocationChange = (e) => {
         setSelectedLocation(e.target.value);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     const handleBook = async (doctorName) => {
@@ -139,16 +144,26 @@ const Cardiology = () => {
         }
     ];
 
-    const filteredDoctors = selectedLocation === "All" 
-        ? doctors 
-        : doctors.filter(doc => doc.location === selectedLocation);
+    const filteredDoctors = doctors.filter(doc => {
+        const matchesLocation = selectedLocation === "All" || doc.location === selectedLocation;
+        const matchesSearch = searchQuery === "" || 
+            doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.hospital.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.specialization.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesLocation && matchesSearch;
+    });
 
     return (
         <div style={{ backgroundColor: "#E8FBFB", minHeight: "100vh", padding: "1rem" }}>
             <div style={styles.Heading}>
                 <button onClick={() => navigate(-1)} style={styles.backArrow}>⬅️</button>
                 <h2 style={styles.head}>Cardiology</h2>
-                <input placeholder="Search by Doctor" style={styles.input} />
+                <input 
+                    placeholder="Search by Doctor" 
+                    style={styles.input} 
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                />
             </div>
 
             <div style={styles.filtersRow}>

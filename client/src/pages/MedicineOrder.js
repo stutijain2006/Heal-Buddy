@@ -4,8 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiShoppingCart } from "react-icons/fi";
 
 const MedicineOrder = () => {
-    const [searchId, setSearchId] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+
+    const filterItems = (items) => {
+        if (!searchQuery) return items;
+        return items.filter(item => 
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    };
 
     const healthConditions = [
         { name: "Diabetes Care", img: "/assets/diabetes-care.png" },
@@ -27,8 +34,8 @@ const MedicineOrder = () => {
         {name: 'MamyPoko', img: '/assets/mamypoko.png'},
     ];
 
-    const handleSearch = () => {
-        console.log("Searching for medicine ID:", searchId);
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     return (
@@ -56,12 +63,11 @@ const MedicineOrder = () => {
                     <div style={styles.searchoption}>
                         <input
                             type="text"
-                            placeholder="🔍︎ Search Medicine by ID"
-                            value={searchId}
-                            onChange={(e) => setSearchId(e.target.value)}
+                            placeholder="🔍︎ Search by Health Condition or Brand"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
                             style={styles.searchInput}
                         />
-                        <button onClick={handleSearch} style={styles.searchButton}>Search</button>
                     </div>
                 </div>
                 <div><img src="/assets/doctor1.png" alt="Search" style={styles.searchimages} /></div>
@@ -110,47 +116,56 @@ const MedicineOrder = () => {
                 </div>
             </div>
 
-            <div style={styles.categorySection1}>
-                <h3 style={styles.sectionHeading}>Browse by Health Conditions</h3>
-                <div style={styles.categoryList}>
-                    {healthConditions.map((cond) => (
-                        <div
-                            key={cond.name}
-                            style={styles.categoryItem}
-                            onClick={() => {
-                                if (cond.name === "Diabetes Care") navigate("/order-medicine/diabetes-care");
-                            }}
-                        >
-                            <img
-                                src={cond.img}
-                                alt={cond.name}
-                                style={styles.categoryImage}
-                            />
-                            <div>{cond.name}</div>
-                        </div>
-                    ))}
+            {filterItems(healthConditions).length > 0 && (
+                <div style={styles.categorySection1}>
+                    <h3 style={styles.sectionHeading}>Browse by Health Conditions</h3>
+                    <div style={styles.categoryList}>
+                        {filterItems(healthConditions).map((cond) => (
+                            <div
+                                key={cond.name}
+                                style={styles.categoryItem}
+                                onClick={() => {
+                                    if (cond.name === "Diabetes Care") navigate("/order-medicine/diabetes-care");
+                                }}
+                            >
+                                <img
+                                    src={cond.img}
+                                    alt={cond.name}
+                                    style={styles.categoryImage}
+                                />
+                                <div>{cond.name}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
-
-            <div style={styles.categorySection1}>
-                <h3 style={styles.sectionHeading}>Shop by Brand</h3>
-                <div style={styles.categoryList}>
-                    {brands.map((cond) => (
-                        <div
-                            key={cond.name}
-                            style={styles.categoryItem}
-                        >
-                            <img
-                                src={cond.img}
-                                alt={cond.name}
-                                style={styles.categoryImage}
-                            />
-                            <div>{cond.name}</div>
-                        </div>
-                    ))}
+            {filterItems(brands).length > 0 && (
+                <div style={styles.categorySection1}>
+                    <h3 style={styles.sectionHeading}>Shop by Brand</h3>
+                    <div style={styles.categoryList}>
+                        {filterItems(brands).map((cond) => (
+                            <div
+                                key={cond.name}
+                                style={styles.categoryItem}
+                            >
+                                <img
+                                    src={cond.img}
+                                    alt={cond.name}
+                                    style={styles.categoryImage}
+                                />
+                                <div>{cond.name}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {searchQuery && filterItems([...healthConditions, ...brands]).length === 0 && (
+                <div style={styles.noResults}>
+                    No results found for "{searchQuery}"
+                </div>
+            )}
 
         </div>
     );
@@ -290,6 +305,7 @@ const styles = {
         gap: '1rem',
         border: '0.52px solid #ccc',
         width: '15vw',
+        height: '15vh',
     },
     categorycontent: {
         display: 'flex',
@@ -334,6 +350,14 @@ const styles = {
         flexWrap: 'wrap',
         maxWidth: '100%',
         overflow: 'hidden'
+    },
+    noResults: {
+        textAlign: "center",
+        padding: "3rem",
+        fontSize: "1.2rem",
+        color: "#808080",
+        fontFamily: 'inter bold 500',
+        fontWeight: 'bold'
     }
 };
 
