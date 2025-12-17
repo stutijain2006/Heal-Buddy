@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -8,8 +8,35 @@ const DiabetesCare = () => {
     const [filter, setFilter] = useState("");
     const [search, setSearch] = useState("");
     const [prescriptions, setPrescriptions] = useState({});
+    const [medicines, setMedicines] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedLocation, setSelectedLocation] = useState("Delhi");
 
-    const medicines = [
+    useEffect(() => {
+        fetchMedicines();
+    }, [selectedLocation]);
+
+    const fetchMedicines = async () => {
+        setLoading(true);
+        try {
+            const params = {
+                category: "Diabetes Care",
+                location: selectedLocation
+            };
+            const response = await axios.get("http://localhost:5000/api/medicines", {
+                params
+            });
+            setMedicines(response.data.medicines || []);
+        } catch (error) {
+            console.error("Error fetching medicines:", error);
+            console.error("Error details:", error.response?.data || error.message);
+            setMedicines([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const defaultMedicines = [
         {
             id: 1,
             name: "Apollo Pharmacy Smart Glucose Monitor",
@@ -153,10 +180,22 @@ const DiabetesCare = () => {
             </div>
 
             <div style={styles.medicineList}>
-                {medicines
+                {loading ? (
+                    <div style={styles.noResults}>Loading medicines...</div>
+                ) : medicines
                     .filter(med => 
                         med.name.toLowerCase().includes(search.toLowerCase()) ||
-                        med.description.toLowerCase().includes(search.toLowerCase())
+                        (med.description && med.description.toLowerCase().includes(search.toLowerCase()))
+                    )
+                    .length === 0 ? (
+                    <div style={styles.noResults}>
+                        {search ? `No medicines found matching "${search}"` : `No medicines available in ${selectedLocation}`}
+                    </div>
+                ) : (
+                    medicines
+                    .filter(med => 
+                        med.name.toLowerCase().includes(search.toLowerCase()) ||
+                        (med.description && med.description.toLowerCase().includes(search.toLowerCase()))
                     )
                     .map(med => (
                         <div key={med.id} style={styles.medicineCard}>
@@ -164,7 +203,7 @@ const DiabetesCare = () => {
                             <div style={styles.medicineInfo}>
                                 <div style={styles.medicineName}>{med.name}</div>
                                 <div style={styles.medicineDesc}>{med.description}</div>
-                                <div style={styles.medicinePrice}>₹{med.price}</div>
+                                <div style={styles.medicinePrice}>₹{typeof med.price === 'number' ? med.price.toFixed(0) : med.price}</div>
                                 <input
                                     type="file"
                                     accept=".jpg, .jpeg, .png, .pdf"
@@ -173,14 +212,7 @@ const DiabetesCare = () => {
                                 <button onClick={() => handleBuy(med)} style={styles.buyButton}>Buy Now</button>
                             </div>
                         </div>
-                    ))}
-                {medicines.filter(med => 
-                    med.name.toLowerCase().includes(search.toLowerCase()) ||
-                    med.description.toLowerCase().includes(search.toLowerCase())
-                ).length === 0 && search && (
-                    <div style={styles.noResults}>
-                        No medicines found for "{search}"
-                    </div>
+                    ))
                 )}
             </div>
         </div>

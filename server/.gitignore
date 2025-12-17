@@ -12,3 +12,4 @@
 /database
 /models
 /routes
+/.env
