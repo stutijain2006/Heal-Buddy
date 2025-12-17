@@ -15,9 +15,30 @@ const AdminLabTests = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             console.log(response.data);
-            setTests(response.data);
+            // Handle both array and object responses
+            const testsData = Array.isArray(response.data) ? response.data : (response.data.tests || []);
+            setTests(testsData);
         } catch (error) {
             console.error("Error fetching lab tests", error);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
+
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 'approved': return '#4CAF50';
+            case 'rejected': return '#f44336';
+            case 'pending': return '#ff9800';
+            default: return '#808080';
         }
     };
 
@@ -41,10 +62,16 @@ const AdminLabTests = () => {
             ) : (
                 tests.map(test => (
                     <div key={test.id} style={styles.card}>
-                        <p><strong>ID:</strong> {test.id}</p>
-                        <p><strong>Test:</strong> {test.testName}</p>
-                        <p><strong>Date:</strong> {test.date}</p>
-                        <p><strong>Status:</strong> {test.status}</p>
+                        <p><strong>Patient Name:</strong> {test.User?.fullname || 'N/A'}</p>
+                        <p><strong>Test Name:</strong> {test.testName}</p>
+                        <p><strong>Test Date:</strong> {formatDate(test.testDate)}</p>
+                        <p><strong>Time Slot:</strong> {test.timeSlot || 'N/A'}</p>
+                        <p><strong>Mode:</strong> {test.mode || 'N/A'}</p>
+                        <p><strong>Status:</strong> 
+                            <span style={{...styles.statusBadge, backgroundColor: getStatusColor(test.status)}}>
+                                {test.status ? test.status.charAt(0).toUpperCase() + test.status.slice(1) : 'Pending'}
+                            </span>
+                        </p>
                         <div style={styles.buttonContainer}>
                             <button
                                 onClick={() => handleStatusChange(test.id, "approved")}
@@ -117,6 +144,15 @@ const styles = {
         cursor: "pointer",
         fontSize: '1.1rem',
         width: '8vw'
+    },
+    statusBadge: {
+        display: 'inline-block',
+        color: 'white',
+        padding: '0.25rem 0.75rem',
+        borderRadius: '12px',
+        marginLeft: '0.5rem',
+        fontSize: '0.9rem',
+        fontWeight: 'bold'
     },
 };
 

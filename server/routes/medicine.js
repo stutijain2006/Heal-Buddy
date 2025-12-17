@@ -2,6 +2,7 @@ const express= require('express');
 const router= express.Router();
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 const MedicineOrder = require('../models/MedicineOrder');
+const User = require('../models/user');
 const upload= require('../middleware/upload');
 
 router.post('/medicine-orders', verifyToken, upload.single('prescription'), async (req, res) => {
@@ -26,10 +27,26 @@ router.get('/medicine-orders', verifyToken, async (req, res) => {
 
 router.get('/admin/medicine-orders', verifyToken, isAdmin, async (req, res) => {
     try{
-        const orders= await MedicineOrder.findAll();
-        res.status(200).json(orders);
+        const orders = await MedicineOrder.findAll({
+            include: [{
+                model: User,
+                attributes: ['id', 'fullname', 'email', 'mobile']
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+        // Custom sort: pending first, then by date (oldest first within pending)
+        const sortedOrders = orders.sort((a, b) => {
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            if (a.status === 'pending' && b.status === 'pending') {
+                return new Date(a.createdAt) - new Date(b.createdAt); // oldest first
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt); // newest first for others
+        });
+        res.status(200).json(sortedOrders);
     }catch(error){
-        res.status(500).json({ message: 'Error fetching medicine orders' });
+        console.error('Error fetching medicine orders:', error);
+        res.status(500).json({ message: 'Error fetching medicine orders', error: error.message });
     }
 });
 

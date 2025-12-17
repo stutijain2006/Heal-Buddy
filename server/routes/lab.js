@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const LabTest = require('../models/LabTest');
+const User = require('../models/user');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
 router.post('/book', verifyToken, async (req, res) => {
@@ -47,11 +48,26 @@ router.get('/', verifyToken, async (req, res) => {
 
 router.get('/admin', verifyToken, isAdmin, async (req, res) => {
     try {
-        const tests = await LabTest.findAll();
-        res.status(200).json(tests);
+        const tests = await LabTest.findAll({
+            include: [{
+                model: User,
+                attributes: ['id', 'fullname', 'email', 'mobile']
+            }],
+            order: [['createdAt', 'ASC']] // Will be resorted
+        });
+        // Custom sort: pending first, then by oldest first within pending
+        const sortedTests = tests.sort((a, b) => {
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            if (a.status === 'pending' && b.status === 'pending') {
+                return new Date(a.createdAt) - new Date(b.createdAt); // oldest first
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt); // newest first for others
+        });
+        res.status(200).json(sortedTests);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching lab tests' });
+        console.error('Error fetching lab tests:', error);
+        res.status(500).json({ message: 'Error fetching lab tests', error: error.message });
     }
 });
 

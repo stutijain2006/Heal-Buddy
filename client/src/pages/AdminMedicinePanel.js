@@ -14,9 +14,29 @@ const AdminMedicineOrders = () => {
             const response = await axios.get("http://localhost:5000/api/admin/medicine-orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setOrders(response.data);
+            const ordersData = Array.isArray(response.data) ? response.data : [];
+            setOrders(ordersData);
         } catch (error) {
             console.error("Error fetching medicine orders", error);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
+
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 'approved': return '#4CAF50';
+            case 'rejected': return '#f44336';
+            case 'pending': return '#ff9800';
+            default: return '#808080';
         }
     };
 
@@ -40,9 +60,16 @@ const AdminMedicineOrders = () => {
             ) : (
                 orders.map(order => (
                     <div key={order.id} style={styles.card}>
-                        <p><strong>ID:</strong> {order.id}</p>
+                        <p><strong>Patient Name:</strong> {order.User?.fullname || 'N/A'}</p>
                         <p><strong>Medicines:</strong> {order.medicines}</p>
-                        <p><strong>Status:</strong> {order.status}</p>
+                        <p><strong>Quantity:</strong> {order.quantity || 'N/A'}</p>
+                        <p><strong>Delivery Address:</strong> {order.deliveryAddress || 'N/A'}</p>
+                        <p><strong>Order Date:</strong> {formatDate(order.createdAt)}</p>
+                        <p><strong>Status:</strong> 
+                            <span style={{...styles.statusBadge, backgroundColor: getStatusColor(order.status)}}>
+                                {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
+                            </span>
+                        </p>
                         <div style={styles.buttonContainer}>
                             <button
                                 onClick={() => handleStatusChange(order.id, "approved")}
@@ -115,6 +142,15 @@ const styles = {
         cursor: "pointer",
         fontSize: '1.1rem',
         width: '8vw'
+    },
+    statusBadge: {
+        display: 'inline-block',
+        color: 'white',
+        padding: '0.25rem 0.75rem',
+        borderRadius: '12px',
+        marginLeft: '0.5rem',
+        fontSize: '0.9rem',
+        fontWeight: 'bold'
     },
 };
 

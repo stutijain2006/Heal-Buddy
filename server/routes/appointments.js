@@ -1,6 +1,7 @@
 const express= require('express');
 const router= express.Router();
 const Appointment= require('../models/appointment');
+const User = require('../models/user');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
 router.post('/appointments', verifyToken, async (req, res) => {
@@ -28,12 +29,30 @@ router.get('/appointments', verifyToken, async (req, res) => {
 
 router.get('/admin/appointments', verifyToken, isAdmin, async (req, res) => {
     try {
-        const appointments = await Appointment.findAll();
-        res.status(200).json({ appointments });
+        const appointments = await Appointment.findAll({
+            include: [{
+                model: User,
+                attributes: ['id', 'fullname', 'email', 'mobile']
+            }],
+            order: [
+                ['status', 'ASC'], // pending first (alphabetically 'pending' comes before 'approved'/'rejected')
+                ['createdAt', 'ASC'] // oldest first within each status group
+            ]
+        });
+        // Custom sort: pending first, then by date
+        const sortedAppointments = appointments.sort((a, b) => {
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            if (a.status === 'pending' && b.status === 'pending') {
+                return new Date(a.createdAt) - new Date(b.createdAt); // oldest first
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt); // newest first for others
+        });
+        res.status(200).json({ appointments: sortedAppointments });
     } 
     catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching appointments' });
+        console.error('Error fetching appointments:', error);
+        res.status(500).json({ message: 'Error fetching appointments', error: error.message });
     }
 })
 
